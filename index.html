@@ -1,0 +1,834 @@
+<title>Minor Soccer Gym Schedule</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Karla:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#F6F5EF;
+    --surface:#FFFFFF;
+    --surface-2:#EFEEE5;
+    --ink:#1C231D;
+    --ink-soft:#4B5450;
+    --muted:#767F79;
+    --line:#DEE1D7;
+    --accent:#2E6B4F;
+    --accent-ink:#F4FBF6;
+    --extend-bg:#FBEFDC;
+    --extend-ink:#7A4B14;
+    --unfilled-bg:#F9E7E4;
+    --unfilled-ink:#8A3527;
+
+    --t-u6-bg:#FBE2DA;      --t-u6-ink:#B04324;
+    --t-u8a-bg:#DCF0F1;     --t-u8a-ink:#186E7A;
+    --t-u8b-bg:#F6ECD2;     --t-u8b-ink:#8A6710;
+    --t-u10a-bg:#E7E0F3;    --t-u10a-ink:#5B3E93;
+    --t-u10b-bg:#DEE7F5;    --t-u10b-ink:#2C4E86;
+    --t-u1214-bg:#DCEDE2;  --t-u1214-ink:#215C3E;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15201A;
+      --surface:#1D2B23;
+      --surface-2:#24352B;
+      --ink:#EAF1EC;
+      --ink-soft:#C2CFC7;
+      --muted:#8CA096;
+      --line:#31473A;
+      --accent:#5FBF8C;
+      --accent-ink:#0D1912;
+      --extend-bg:#40331A;
+      --extend-ink:#E8B96E;
+      --unfilled-bg:#412423;
+      --unfilled-ink:#F0A99A;
+
+      --t-u6-bg:#4A2A22;     --t-u6-ink:#F2A487;
+      --t-u8a-bg:#1B3B3E;    --t-u8a-ink:#7FD7DE;
+      --t-u8b-bg:#3D3319;    --t-u8b-ink:#E6C465;
+      --t-u10a-bg:#332A47;   --t-u10a-ink:#C6ADEE;
+      --t-u10b-bg:#22314A;   --t-u10b-ink:#9CBBEE;
+      --t-u1214-bg:#1E3A2A;  --t-u1214-ink:#8FDCB0;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15201A;
+    --surface:#1D2B23;
+    --surface-2:#24352B;
+    --ink:#EAF1EC;
+    --ink-soft:#C2CFC7;
+    --muted:#8CA096;
+    --line:#31473A;
+    --accent:#5FBF8C;
+    --accent-ink:#0D1912;
+    --extend-bg:#40331A;
+    --extend-ink:#E8B96E;
+    --unfilled-bg:#412423;
+    --unfilled-ink:#F0A99A;
+
+    --t-u6-bg:#4A2A22;     --t-u6-ink:#F2A487;
+    --t-u8a-bg:#1B3B3E;    --t-u8a-ink:#7FD7DE;
+    --t-u8b-bg:#3D3319;    --t-u8b-ink:#E6C465;
+    --t-u10a-bg:#332A47;   --t-u10a-ink:#C6ADEE;
+    --t-u10b-bg:#22314A;   --t-u10b-ink:#9CBBEE;
+    --t-u1214-bg:#1E3A2A;  --t-u1214-ink:#8FDCB0;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Karla",system-ui,sans-serif;
+    margin:0;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:780px;margin:0 auto;}
+
+  .masthead{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-bottom:18px;
+  }
+  .eyebrow{
+    font-family:"Karla",sans-serif;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  h1{
+    font-family:"Barlow Condensed",sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,6vw,42px);
+    line-height:1.02;
+    margin:0;
+    text-wrap:balance;
+  }
+  .season-range{
+    color:var(--ink-soft);
+    font-size:15px;
+    margin-top:2px;
+  }
+
+  /* ---- mode switcher (Team / Night / Calendar) ---- */
+  .mode-switcher{
+    display:inline-flex;
+    gap:2px;
+    padding:3px;
+    background:var(--surface-2);
+    border-radius:11px;
+    margin-bottom:20px;
+  }
+  .mode-btn{
+    font-family:"Karla",sans-serif;
+    font-weight:600;
+    font-size:13px;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    padding:7px 14px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .mode-btn[aria-pressed="true"]{
+    background:var(--surface);
+    color:var(--ink);
+    box-shadow:0 1px 2px rgba(0,0,0,.08);
+  }
+  .mode-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  .view-panel{display:none;}
+  .view-panel.active{display:block;}
+
+  /* ---- team switcher pills ---- */
+  .switcher{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 20px;
+  }
+  .team-btn{
+    font-family:"Barlow Condensed",sans-serif;
+    font-weight:600;
+    font-size:17px;
+    letter-spacing:.01em;
+    border:1.5px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    border-radius:999px;
+    padding:8px 16px 7px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .team-btn:hover{transform:translateY(-1px);}
+  .team-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .team-btn .count{
+    font-family:"Karla",sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:var(--muted);
+    background:var(--surface-2);
+    border-radius:999px;
+    padding:1px 7px;
+  }
+  .team-btn[aria-pressed="true"]{
+    border-color:transparent;
+    color:var(--pill-ink);
+    background:var(--pill-bg);
+  }
+  .team-btn[aria-pressed="true"] .count{
+    background:color-mix(in srgb, var(--pill-ink) 16%, transparent);
+    color:var(--pill-ink);
+  }
+  .team-btn[data-team="U6"], .dot[data-team="U6"], .tag[data-team="U6"]{--pill-bg:var(--t-u6-bg);--pill-ink:var(--t-u6-ink);}
+  .team-btn[data-team="U8-Arsenal"], .dot[data-team="U8-Arsenal"], .tag[data-team="U8-Arsenal"]{--pill-bg:var(--t-u8a-bg);--pill-ink:var(--t-u8a-ink);}
+  .team-btn[data-team="U8-Manchester United"], .dot[data-team="U8-Manchester United"], .tag[data-team="U8-Manchester United"]{--pill-bg:var(--t-u8b-bg);--pill-ink:var(--t-u8b-ink);}
+  .team-btn[data-team="U10-Barcelona"], .dot[data-team="U10-Barcelona"], .tag[data-team="U10-Barcelona"]{--pill-bg:var(--t-u10a-bg);--pill-ink:var(--t-u10a-ink);}
+  .team-btn[data-team="U10-Real Madrid"], .dot[data-team="U10-Real Madrid"], .tag[data-team="U10-Real Madrid"]{--pill-bg:var(--t-u10b-bg);--pill-ink:var(--t-u10b-ink);}
+  .team-btn[data-team="U12/14"], .dot[data-team="U12/14"], .tag[data-team="U12/14"]{--pill-bg:var(--t-u1214-bg);--pill-ink:var(--t-u1214-ink);}
+
+  .tag{
+    font-family:"Karla",sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:var(--pill-ink);
+    background:var(--pill-bg);
+    border-radius:6px;
+    padding:2px 7px;
+    white-space:nowrap;
+  }
+
+  .panel-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    padding-bottom:12px;
+    margin-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel-head h2{
+    font-family:"Barlow Condensed",sans-serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0;
+  }
+  .panel-head .stat{
+    font-size:13px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .panel-head .stat b{
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+
+  .month-group{margin-top:22px;}
+  .month-label{
+    font-family:"Barlow Condensed",sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 8px 2px;
+  }
+
+  .session{
+    display:grid;
+    grid-template-columns:88px 96px 1fr;
+    align-items:center;
+    gap:14px;
+    padding:11px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .session:last-child{border-bottom:none;}
+  .s-date{
+    font-family:"Barlow Condensed",sans-serif;
+    line-height:1.05;
+  }
+  .s-date .day{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .s-date .num{
+    display:block;
+    font-size:21px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .s-time{
+    font-size:14px;
+    font-variant-numeric:tabular-nums;
+    color:var(--ink-soft);
+  }
+  .s-right{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:7px;
+    min-width:0;
+  }
+  .s-loc{
+    font-weight:600;
+    font-size:15.5px;
+  }
+  .badge{
+    font-size:11.5px;
+    font-weight:600;
+    border-radius:6px;
+    padding:2px 7px;
+    white-space:nowrap;
+  }
+  .badge.extend{background:var(--extend-bg);color:var(--extend-ink);}
+  .badge.pair{
+    background:var(--surface-2);
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  .map-link{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--accent);
+    text-decoration:none;
+    border-bottom:1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    white-space:nowrap;
+  }
+  .map-link:hover{border-bottom-color:var(--accent);}
+  .map-link:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  .roster-box{
+    margin:14px 0 24px;
+    padding:14px 16px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  .roster-box h3{
+    font-family:"Barlow Condensed",sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.03em;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .roster-note{
+    font-size:11.5px;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .roster-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-bottom:10px;
+  }
+  .roster-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 6px 5px 12px;
+    font-size:13px;
+    color:var(--ink);
+  }
+  .roster-chip.dup{background:var(--unfilled-bg);border-color:var(--unfilled-ink);color:var(--unfilled-ink);}
+  .roster-empty{font-size:12.5px;color:var(--muted);font-style:italic;}
+
+  .empty-note{
+    padding:26px 4px;
+    color:var(--muted);
+    font-size:14.5px;
+  }
+
+  /* ---- night view ---- */
+  .night-row{
+    display:grid;
+    grid-template-columns:88px 1fr;
+    gap:14px;
+    padding:13px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  .night-row:last-child{border-bottom:none;}
+  .night-gyms{display:flex; flex-direction:column; gap:8px;}
+  .night-gym{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    font-size:14.5px;
+  }
+  .night-gym .loc{font-weight:600; min-width:118px;}
+  .night-gym .slot{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  .night-gym .slot .clock{color:var(--muted); font-variant-numeric:tabular-nums;}
+
+  /* ---- calendar view ---- */
+  .cal-month{margin-top:26px;}
+  .cal-month:first-child{margin-top:0;}
+  .cal-month-label{
+    font-family:"Barlow Condensed",sans-serif;
+    font-weight:700;
+    font-size:20px;
+    margin:0 0 10px 2px;
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+  }
+  .cal-weekday{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+    padding-bottom:4px;
+  }
+  .cal-day{
+    aspect-ratio:1/1;
+    border-radius:8px;
+    border:1px solid transparent;
+    background:var(--surface);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    cursor:default;
+    font-variant-numeric:tabular-nums;
+  }
+  .cal-day.empty{background:transparent;}
+  .cal-day .d-num{font-size:12.5px; color:var(--ink-soft);}
+  .cal-day.has-game{cursor:pointer; border-color:var(--line);}
+  .cal-day.has-game .d-num{color:var(--ink); font-weight:700;}
+  .cal-day.has-game:hover{border-color:var(--accent);}
+  .cal-day.selected{background:var(--surface-2); border-color:var(--accent);}
+  .cal-dots{display:flex; gap:2px; flex-wrap:wrap; justify-content:center; max-width:34px;}
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--pill-ink);}
+
+  .cal-detail{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+  .cal-detail .cal-detail-empty{color:var(--muted); font-size:13.5px;}
+
+  footer{
+    margin-top:34px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--muted);
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px 22px;
+  }
+  footer .key{display:flex;align-items:center;gap:6px;}
+  footer .swatch{width:11px;height:11px;border-radius:3px;display:inline-block;}
+
+  @media (max-width:420px){
+    .session{grid-template-columns:74px 84px 1fr; gap:9px;}
+    .s-date .num{font-size:19px;}
+    .night-row{grid-template-columns:64px 1fr; gap:9px;}
+    .night-gym .loc{min-width:96px; font-size:13.5px;}
+  }
+</style>
+
+<div class="wrap">
+  <div class="masthead">
+    <span class="eyebrow">Sportedconnect &middot; Minor Soccer</span>
+    <h1>Gym Schedule</h1>
+    <span class="season-range">Fall 2026 &ndash; Winter 2027 &middot; Barcode #150357</span>
+  </div>
+
+  <div class="mode-switcher" role="tablist" aria-label="Choose a view">
+    <button type="button" class="mode-btn" data-mode="team" aria-pressed="true">By team</button>
+    <button type="button" class="mode-btn" data-mode="night" aria-pressed="false">By night</button>
+    <button type="button" class="mode-btn" data-mode="calendar" aria-pressed="false">Calendar</button>
+  </div>
+
+  <!-- Team view -->
+  <div class="view-panel active" id="view-team">
+    <div class="switcher" id="switcher" role="tablist" aria-label="Choose a team"></div>
+    <div class="panel-head">
+      <h2 id="panelTeam">&nbsp;</h2>
+      <span class="stat"><b id="panelCount">0</b> sessions this season</span>
+    </div>
+    <div class="roster-box" id="rosterBox">
+      <h3>Roster</h3>
+      <div class="roster-note" id="rosterNote"></div>
+      <div class="roster-list" id="rosterList"></div>
+    </div>
+    <div id="scheduleBody"></div>
+  </div>
+
+  <!-- Night view -->
+  <div class="view-panel" id="view-night">
+    <div class="panel-head">
+      <h2>All nights</h2>
+      <span class="stat"><b id="nightCount">0</b> game nights</span>
+    </div>
+    <div id="nightBody"></div>
+  </div>
+
+  <!-- Calendar view -->
+  <div class="view-panel" id="view-calendar">
+    <div id="calBody"></div>
+    <div class="cal-detail" id="calDetail">
+      <div class="cal-detail-empty">Click a date to see details.</div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="key"><span class="swatch" style="background:var(--extend-bg)"></span>Late slot stretches to 9:00 PM</span>
+    <span class="key">&ldquo;with U12/14&rdquo; = sharing the gym that night</span>
+  </footer>
+</div>
+
+<script>
+const SCHEDULES = {"U6": [{"date": "2026-09-21", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-09-22", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-09-29", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-02", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-06", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-09", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-13", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-16", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-20", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-23", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-26", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-27", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-30", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-03", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-06", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-09", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-10", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-16", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-17", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-20", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-24", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-12-01", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-12-04", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-12-07", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-12-08", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-12-11", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-12-15", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-05", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-11", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-15", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-01-18", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-22", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-01-25", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-01", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-05", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-08", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-09", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-19", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-22", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-23", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-26", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-02", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-05", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-09", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-12", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-15", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-16", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-03-30", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}], "U8-Arsenal": [{"date": "2026-09-21", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-09-28", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-09-29", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-02", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-06", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-09", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-13", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-16", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-20", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-23", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-26", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-10-30", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-02", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-03", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-06", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-09", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-10", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-17", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-20", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-23", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-24", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-12-01", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-12-04", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-12-07", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-12-08", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-12-11", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-12-18", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-08", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-01-12", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-01-15", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-19", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-01-22", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-26", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-02", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-05", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-08", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-16", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-19", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-22", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-23", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-01", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-02", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-08", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-09", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-12", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-16", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-22", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-30", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}], "U8-Manchester United": [{"date": "2026-09-22", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-09-28", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-02", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-05", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-06", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-09", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-13", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-16", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-20", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-23", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-10-27", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-10-30", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-02", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-03", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-06", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2026-11-10", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-16", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-11-17", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-20", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-23", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-11-30", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-12-01", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-12-04", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2026-12-08", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-12-11", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2026-12-14", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-01-04", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-08", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-12", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-15", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-19", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-22", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-01-26", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-02", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-05", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U10-Barcelona", "extended": false, "minutes": 60}, {"date": "2027-02-09", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-16", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-19", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-02-23", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-02-26", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-02", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-05", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-09", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-12", "day": "Friday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-15", "day": "Monday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}, {"date": "2027-03-16", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U10-Real Madrid", "extended": false, "minutes": 60}, {"date": "2027-03-23", "day": "Tuesday", "time": "6:30 - 7:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U12/14", "extended": false, "minutes": 60}], "U10-Barcelona": [{"date": "2026-09-21", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-09-22", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-09-29", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-02", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-06", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-09", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-13", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-16", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-20", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-23", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-26", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-30", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-02", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-03", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-06", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-10", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-16", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-17", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-20", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-24", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-12-01", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-12-04", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-12-07", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-12-08", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-12-11", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-12-15", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-01-04", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-08", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-12", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-15", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-19", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-22", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-26", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-02-02", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-02-05", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-02-09", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-19", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-02-22", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-23", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-26", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-03-02", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": true, "minutes": 90}, {"date": "2027-03-05", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-03-09", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-03-12", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-03-15", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-03-16", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-03-30", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}], "U10-Real Madrid": [{"date": "2026-09-21", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-09-28", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-09-29", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-02", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-10-06", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-09", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-13", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-16", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-20", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-23", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-27", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-30", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-03", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-06", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-09", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-10", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-17", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-20", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-23", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-24", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-12-01", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-12-04", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-12-08", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-12-11", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-12-14", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-12-18", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-01-05", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-01-11", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-01-15", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-01-18", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-01-22", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-01-25", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-01", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-05", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-02-08", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-02-16", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-02-19", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-02-22", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-02-23", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-01", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-02", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-08", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-09", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-12", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-16", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-03-30", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}], "U12/14": [{"date": "2026-09-22", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-09-28", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-02", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-05", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-06", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-09", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-13", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-16", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-20", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-23", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-26", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-10-27", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-10-30", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-02", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-03", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-06", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-09", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-11-10", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-16", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-11-17", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-20", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-23", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2026-11-30", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-12-01", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-12-04", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-12-07", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2026-12-08", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2026-12-11", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-01-08", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-01-12", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-01-15", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": true, "minutes": 90}, {"date": "2027-01-19", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-01-22", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": true, "minutes": 90}, {"date": "2027-01-26", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-02-02", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-02-05", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U6", "extended": true, "minutes": 90}, {"date": "2027-02-08", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-09", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": true, "minutes": 90}, {"date": "2027-02-16", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-02-19", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "pairedWith": "U6", "extended": false, "minutes": 60}, {"date": "2027-02-23", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": true, "minutes": 90}, {"date": "2027-02-26", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": true, "minutes": 90}, {"date": "2027-03-02", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-03-05", "day": "Friday", "time": "7:30 - 8:30 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-03-09", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": true, "minutes": 90}, {"date": "2027-03-12", "day": "Friday", "time": "7:30 - 9:00 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": true, "minutes": 90}, {"date": "2027-03-15", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}, {"date": "2027-03-16", "day": "Tuesday", "time": "7:30 - 9:00 PM", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": true, "minutes": 90}, {"date": "2027-03-22", "day": "Monday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Arsenal", "extended": false, "minutes": 60}, {"date": "2027-03-23", "day": "Tuesday", "time": "7:30 - 8:30 PM", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "pairedWith": "U8-Manchester United", "extended": false, "minutes": 60}]};
+const NIGHTS = [{"date": "2026-09-21", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-09-22", "day": "Tuesday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-09-28", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-09-29", "day": "Tuesday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-02", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-05", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-06", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-09", "day": "Friday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-13", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-16", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-20", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-23", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-26", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-27", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-10-30", "day": "Friday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-02", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-03", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-06", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-09", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-10", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-16", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-17", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-20", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-23", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-24", "day": "Tuesday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-11-30", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-01", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-04", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-07", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-08", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-11", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-14", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-15", "day": "Tuesday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2026-12-18", "day": "Friday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-04", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-05", "day": "Tuesday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-08", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-11", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-12", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-15", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-18", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-19", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-22", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-25", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-01-26", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-01", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-02", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-05", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-08", "day": "Monday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-09", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-16", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-19", "day": "Friday", "bookings": [{"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U6", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-22", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-23", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-02-26", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-01", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-02", "day": "Tuesday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-05", "day": "Friday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-08", "day": "Monday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-09", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-12", "day": "Friday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}, {"location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-15", "day": "Monday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-16", "day": "Tuesday", "bookings": [{"location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "9:00 PM", "extended": true}, {"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-22", "day": "Monday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-23", "day": "Tuesday", "bookings": [{"location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "lateEnd": "8:30 PM", "extended": false}]}, {"date": "2027-03-30", "day": "Tuesday", "bookings": [{"location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "lateEnd": "8:30 PM", "extended": false}, {"location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "lateEnd": "8:30 PM", "extended": false}]}];
+const ROSTERS_SEED = {"U6": {"team": "U6", "players": ["David", "Bilal Wahab", "Victor", "Thiago Rebello", "Daniel Issakhojayev", "Tal Kremer", "Souleymane Dao", "Maksim Lee", "Alec", "Sonny Campbell", "Nihaal Varma", "Ernesto", "Youssef Dafid"]}, "U8-Arsenal": {"team": "U8-Arsenal", "players": ["AJ Alexander", "Kasra Otoo", "Asher Uduka", "Anna Onabolu", "Adam Pavani Speroni", "Ethan Oshin", "Sebastian Wong", "Vihaan Supe", "Tamas Petres", "Idan Kremer", "Imran Dao", "Arman Amiree", "Illia Kim (Elijah)", "Arman Amiree", "Imole", "Alexander Hopley", "Mayokun Oyekunle"]}, "U8-Manchester_United": {"team": "U8-Manchester United", "players": ["Kaden Blind", "Roman Lee", "Arin Ingle", "Hrehaan Kumar", "Aria Hasson", "Adrian Zigura", "Michael Sushytskyi sushytskyi@gmail.com", "Ethan Paola Candido dos Santos Souza", "Cody Levi Rena", "Easton McDonald", "Vincent Zucchetto", "Senara Dissanayake", "Ma\u00ebl william Owona", "Hatel Rozenman", "Johanan Wanapia"]}, "U10-Barcelona": {"team": "U10-Barcelona", "players": ["Tak Yiu Mavin Wong", "Kian Otoo", "Darasimi Adesina", "Noah Tait", "Owen Keating", "Haidyn Smith", "Andre Itua", "Adewole Awoyo", "Sushant Narapureddy", "Alexander Kruk", "Vihaan Thummar", "Vivaan Patel", "Arjun", "Alex Chernoff", "Kaleb Lupkoski", "Dumeje Ndukwe", "Hamza Patel", "Theo Canevari"]}, "U10-Real_Madrid": {"team": "U10-Real Madrid", "players": ["Jaiye Agboola's", "Silas Ward", "Laszlo Marton", "Allister Ross", "Stewart Ross", "Saif Rasool", "Nowell Nickels", "Logan Youngman", "Lathen Youngman", "Eve Morgan", "Maxim Sushytskyi", "ambre gehin mauduit", "Odin Korethoski", "Tymon", "Luis Oscar Calderon", "Josiah Ogunade"]}, "U12-14": {"team": "U12/14", "players": ["Sviatoslav", "Giridhar Balamurugan", "Ronil Premnath", "Nathan Anyanti", "Felix Bakovic", "Oddy Onuoha", "Ignacio Costa Gentil", "Kaihan Amiree", "Kiko Simbol", "Maksim Baran", "Dumeje Ndukwe", "Jonah Ng", "Aron Petres", "Aiden cretain", "Gabriella Galliott", "Enzo Canevari", "Enzo T", "Harshbeer Singh Anand", "Nishant Narapureddy", "TONY Minh Duc LE", "Vidit Singh", "Henri Thornton", "Ruhaan Singh Sidhu", "Tom Lemon", "MAYOWA", "Oladoyin Oyinloye", "Munachimso Ayika", "REX CONNOLLY", "Gannon Allard"]}};
+
+const TEAMS = ['U6','U8-Arsenal','U8-Manchester United','U10-Barcelona','U10-Real Madrid','U12/14'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WEEKDAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function fmtDate(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  return {monthLabel: MONTHS[m-1] + ' ' + y, day: d, y, m, d};
+}
+
+function mapLink(address){
+  if(!address) return null;
+  const a = document.createElement('a');
+  a.className = 'map-link';
+  a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.textContent = 'Map';
+  return a;
+}
+
+/* ---------------- mode switching ---------------- */
+const modeButtons = [...document.querySelectorAll('.mode-btn')];
+const panels = {
+  team: document.getElementById('view-team'),
+  night: document.getElementById('view-night'),
+  calendar: document.getElementById('view-calendar'),
+};
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    modeButtons.forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+    Object.entries(panels).forEach(([key, el]) => el.classList.toggle('active', key === btn.dataset.mode));
+  });
+});
+
+/* ---------------- team view ---------------- */
+const switcher = document.getElementById('switcher');
+const panelTeam = document.getElementById('panelTeam');
+const panelCount = document.getElementById('panelCount');
+const scheduleBody = document.getElementById('scheduleBody');
+
+TEAMS.forEach(team => {
+  const btn = document.createElement('button');
+  btn.className = 'team-btn';
+  btn.type = 'button';
+  btn.dataset.team = team;
+  btn.setAttribute('role','tab');
+  btn.setAttribute('aria-pressed','false');
+  btn.innerHTML = team + ' <span class="count">' + SCHEDULES[team].length + '</span>';
+  btn.addEventListener('click', () => selectTeam(team));
+  switcher.appendChild(btn);
+});
+
+function selectTeam(team){
+  [...switcher.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.team === team ? 'true' : 'false'));
+  panelTeam.textContent = team;
+  const games = SCHEDULES[team];
+  panelCount.textContent = games.length;
+  scheduleBody.innerHTML = '';
+  renderRoster(team);
+
+  if(!games.length){
+    const p = document.createElement('div');
+    p.className = 'empty-note';
+    p.textContent = 'No sessions scheduled.';
+    scheduleBody.appendChild(p);
+    return;
+  }
+
+  let currentMonth = null;
+  let monthEl = null;
+  games.forEach(g => {
+    const {monthLabel, day} = fmtDate(g.date);
+    if(monthLabel !== currentMonth){
+      currentMonth = monthLabel;
+      const group = document.createElement('div');
+      group.className = 'month-group';
+      const label = document.createElement('div');
+      label.className = 'month-label';
+      label.textContent = monthLabel;
+      group.appendChild(label);
+      scheduleBody.appendChild(group);
+      monthEl = group;
+    }
+    const row = document.createElement('div');
+    row.className = 'session';
+
+    const dateCol = document.createElement('div');
+    dateCol.className = 's-date';
+    dateCol.innerHTML = '<span class="day">' + g.day.slice(0,3) + '</span><span class="num">' + day + '</span>';
+
+    const timeCol = document.createElement('div');
+    timeCol.className = 's-time';
+    timeCol.textContent = g.time;
+
+    const rightCol = document.createElement('div');
+    rightCol.className = 's-right';
+    const loc = document.createElement('span');
+    loc.className = 's-loc';
+    loc.textContent = g.location;
+    rightCol.appendChild(loc);
+    const gMap = mapLink(g.address);
+    if(gMap) rightCol.appendChild(gMap);
+
+    if(g.extended){
+      const b = document.createElement('span');
+      b.className = 'badge extend';
+      b.textContent = 'to 9:00 PM';
+      rightCol.appendChild(b);
+    }
+    if(g.pairedWith){
+      const b = document.createElement('span');
+      b.className = 'badge pair';
+      b.textContent = 'with ' + g.pairedWith;
+      rightCol.appendChild(b);
+    }
+
+    row.appendChild(dateCol);
+    row.appendChild(timeCol);
+    row.appendChild(rightCol);
+    monthEl.appendChild(row);
+  });
+}
+
+/* ---------------- roster (static, read-only display) ---------------- */
+const rosterList = document.getElementById('rosterList');
+const rosterNote = document.getElementById('rosterNote');
+
+function teamSlug(team){
+  return team.replace('/', '-').replace(/ /g, '_');
+}
+
+// Names appearing more than once in the registration snapshot (same team
+// twice, or on two different teams) - flagged in red so the club can check
+// whether it's a sibling, a typo, or a duplicate registration.
+const DUPLICATE_NAMES = (() => {
+  const counts = {};
+  Object.values(ROSTERS_SEED).forEach(doc => {
+    doc.players.forEach(name => { counts[name] = (counts[name] || 0) + 1; });
+  });
+  return new Set(Object.keys(counts).filter(name => counts[name] > 1));
+})();
+
+function renderRoster(team){
+  const seed = ROSTERS_SEED[teamSlug(team)];
+  const players = seed ? seed.players : [];
+  rosterNote.textContent = '';
+  rosterList.innerHTML = '';
+  if(!players.length){
+    const empty = document.createElement('div');
+    empty.className = 'roster-empty';
+    empty.textContent = 'No players listed yet.';
+    rosterList.appendChild(empty);
+  } else {
+    players.forEach(name => {
+      const chip = document.createElement('span');
+      chip.className = 'roster-chip' + (DUPLICATE_NAMES.has(name) ? ' dup' : '');
+      const label = document.createElement('span');
+      label.textContent = name;
+      chip.appendChild(label);
+      rosterList.appendChild(chip);
+    });
+  }
+}
+
+selectTeam('U6');
+
+/* ---------------- night view ---------------- */
+const nightBody = document.getElementById('nightBody');
+document.getElementById('nightCount').textContent = NIGHTS.length;
+
+function renderGymRow(booking){
+  const row = document.createElement('div');
+  row.className = 'night-gym';
+  const loc = document.createElement('span');
+  loc.className = 'loc';
+  loc.textContent = booking.location;
+  row.appendChild(loc);
+  const gMap = mapLink(booking.address);
+  if(gMap) row.appendChild(gMap);
+
+  if(booking.early){
+    const s = document.createElement('span');
+    s.className = 'slot';
+    s.innerHTML = '<span class="clock">6:30</span>';
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.dataset.team = booking.early;
+    tag.textContent = booking.early;
+    s.appendChild(tag);
+    row.appendChild(s);
+  }
+  if(booking.late){
+    const s = document.createElement('span');
+    s.className = 'slot';
+    s.innerHTML = '<span class="clock">7:30' + (booking.extended ? '– 9:00' : '') + '</span>';
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.dataset.team = booking.late;
+    tag.textContent = booking.late;
+    s.appendChild(tag);
+    row.appendChild(s);
+  }
+  return row;
+}
+
+NIGHTS.forEach(night => {
+  const {day} = fmtDate(night.date);
+  const row = document.createElement('div');
+  row.className = 'night-row';
+
+  const dateCol = document.createElement('div');
+  dateCol.className = 's-date';
+  dateCol.innerHTML = '<span class="day">' + night.day.slice(0,3) + '</span><span class="num">' + day + '</span>';
+
+  const gymsCol = document.createElement('div');
+  gymsCol.className = 'night-gyms';
+  night.bookings.forEach(b => gymsCol.appendChild(renderGymRow(b)));
+
+  row.appendChild(dateCol);
+  row.appendChild(gymsCol);
+  nightBody.appendChild(row);
+});
+
+/* ---------------- calendar view ---------------- */
+const calBody = document.getElementById('calBody');
+const calDetail = document.getElementById('calDetail');
+
+const nightsByDate = {};
+NIGHTS.forEach(n => nightsByDate[n.date] = n);
+
+function isoDate(y,m,d){
+  return y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+}
+
+// figure out season month span from the night list
+const allDates = NIGHTS.map(n => n.date).sort();
+const first = fmtDate(allDates[0]);
+const last = fmtDate(allDates[allDates.length-1]);
+
+let cursorY = first.y, cursorM = first.m;
+while(cursorY < last.y || (cursorY === last.y && cursorM <= last.m)){
+  const monthEl = document.createElement('div');
+  monthEl.className = 'cal-month';
+  const label = document.createElement('div');
+  label.className = 'cal-month-label';
+  label.textContent = MONTHS[cursorM-1] + ' ' + cursorY;
+  monthEl.appendChild(label);
+
+  const grid = document.createElement('div');
+  grid.className = 'cal-grid';
+  WEEKDAYS.forEach(wd => {
+    const el = document.createElement('div');
+    el.className = 'cal-weekday';
+    el.textContent = wd;
+    grid.appendChild(el);
+  });
+
+  const firstOfMonth = new Date(cursorY, cursorM-1, 1);
+  const daysInMonth = new Date(cursorY, cursorM, 0).getDate();
+  let leadingBlanks = firstOfMonth.getDay() - 1; // Mon=0
+  if(leadingBlanks < 0) leadingBlanks = 6;
+  for(let i=0;i<leadingBlanks;i++){
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = isoDate(cursorY, cursorM, d);
+    const night = nightsByDate[iso];
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' + (night ? ' has-game' : '');
+    cell.dataset.date = iso;
+
+    const num = document.createElement('span');
+    num.className = 'd-num';
+    num.textContent = d;
+    cell.appendChild(num);
+
+    if(night){
+      const dots = document.createElement('div');
+      dots.className = 'cal-dots';
+      const teamsToday = [];
+      night.bookings.forEach(b => { if(b.early) teamsToday.push(b.early); if(b.late) teamsToday.push(b.late); });
+      teamsToday.forEach(t => {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.dataset.team = t;
+        dots.appendChild(dot);
+      });
+      cell.appendChild(dots);
+      cell.addEventListener('click', () => showDayDetail(iso));
+    }
+    grid.appendChild(cell);
+  }
+
+  monthEl.appendChild(grid);
+  calBody.appendChild(monthEl);
+
+  cursorM++;
+  if(cursorM > 12){ cursorM = 1; cursorY++; }
+}
+
+function showDayDetail(iso){
+  document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.cal-day[data-date="' + iso + '"]').forEach(el => el.classList.add('selected'));
+
+  const night = nightsByDate[iso];
+  calDetail.innerHTML = '';
+  if(!night){
+    calDetail.innerHTML = '<div class="cal-detail-empty">No game that day.</div>';
+    return;
+  }
+  const {day, monthLabel, day: d} = fmtDate(iso);
+  const heading = document.createElement('div');
+  heading.style.fontFamily = '"Barlow Condensed",sans-serif';
+  heading.style.fontWeight = '700';
+  heading.style.fontSize = '18px';
+  heading.style.marginBottom = '10px';
+  heading.textContent = night.day + ' ' + d + ' ' + monthLabel.split(' ')[0];
+  calDetail.appendChild(heading);
+
+  const gymsCol = document.createElement('div');
+  gymsCol.className = 'night-gyms';
+  night.bookings.forEach(b => gymsCol.appendChild(renderGymRow(b)));
+  calDetail.appendChild(gymsCol);
+}
+</script>
