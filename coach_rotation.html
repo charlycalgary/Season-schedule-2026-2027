@@ -1,0 +1,371 @@
+<title>Coach Rotation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Karla:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#F2F5F9;
+    --surface:#FFFFFF;
+    --surface-2:#E7ECF3;
+    --ink:#1C2733;
+    --ink-soft:#4E5A68;
+    --muted:#7C8797;
+    --line:#DBE2EB;
+    --accent:#2C5B8C;
+    --accent-ink:#F1F6FC;
+    --chip-bg:#E4ECF5;
+    --chip-ink:#2C5B8C;
+    --anchor-bg:#EFE4D8;
+    --anchor-ink:#8A5A2A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121821;
+      --surface:#1A2129;
+      --surface-2:#212A34;
+      --ink:#E7EDF4;
+      --ink-soft:#B7C2D0;
+      --muted:#8695A6;
+      --line:#2B3644;
+      --accent:#7DAEE0;
+      --accent-ink:#0D1720;
+      --chip-bg:#22303F;
+      --chip-ink:#8FC0EE;
+      --anchor-bg:#3A2E1E;
+      --anchor-ink:#E3B27C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121821;
+    --surface:#1A2129;
+    --surface-2:#212A34;
+    --ink:#E7EDF4;
+    --ink-soft:#B7C2D0;
+    --muted:#8695A6;
+    --line:#2B3644;
+    --accent:#7DAEE0;
+    --accent-ink:#0D1720;
+    --chip-bg:#22303F;
+    --chip-ink:#8FC0EE;
+    --anchor-bg:#3A2E1E;
+    --anchor-ink:#E3B27C;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Karla",system-ui,sans-serif;
+    margin:0;
+    padding:26px 16px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+
+  .masthead{display:flex;flex-direction:column;gap:4px;margin-bottom:18px;}
+  .eyebrow{
+    font-family:"Karla",sans-serif;font-weight:700;font-size:12px;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
+  }
+  h1{
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:clamp(28px,6vw,40px);line-height:1.02;margin:0;text-wrap:balance;
+  }
+  .season-range{color:var(--ink-soft);font-size:14.5px;margin-top:2px;}
+
+  .mode-switcher{
+    display:inline-flex;gap:2px;padding:3px;background:var(--surface-2);
+    border-radius:11px;margin-bottom:20px;
+  }
+  .mode-btn{
+    font-family:"Karla",sans-serif;font-weight:600;font-size:13px;border:none;
+    background:transparent;color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;
+  }
+  .mode-btn[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .mode-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .view-panel{display:none;}
+  .view-panel.active{display:block;}
+
+  .coach-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px;}
+  .coach-btn{
+    font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16.5px;
+    border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);
+    border-radius:999px;padding:7px 14px 6px;cursor:pointer;display:flex;align-items:center;gap:7px;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .coach-btn:hover{transform:translateY(-1px);}
+  .coach-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .coach-btn .count{
+    font-family:"Karla",sans-serif;font-weight:600;font-size:11.5px;color:var(--muted);
+    background:var(--surface-2);border-radius:999px;padding:1px 7px;
+  }
+  .coach-btn[aria-pressed="true"]{border-color:transparent;color:var(--chip-ink);background:var(--chip-bg);}
+  .coach-btn[aria-pressed="true"] .count{background:color-mix(in srgb, var(--chip-ink) 16%, transparent);color:var(--chip-ink);}
+  .coach-btn.anchor[aria-pressed="true"]{color:var(--anchor-ink);background:var(--anchor-bg);}
+  .coach-btn.anchor[aria-pressed="true"] .count{background:color-mix(in srgb, var(--anchor-ink) 18%, transparent);color:var(--anchor-ink);}
+
+  .panel-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid var(--line);
+  }
+  .panel-head h2{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:24px;margin:0;}
+  .panel-head .stat{font-size:12.5px;color:var(--muted);white-space:nowrap;}
+  .panel-head .stat b{color:var(--ink);font-variant-numeric:tabular-nums;}
+
+  .month-group{margin-top:20px;}
+  .month-label{
+    font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:13.5px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px;
+  }
+
+  .session{
+    display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:12px;
+    padding:10px 4px;border-bottom:1px solid var(--line);
+  }
+  .session:last-child{border-bottom:none;}
+  .s-date{font-family:"Barlow Condensed",sans-serif;line-height:1.05;}
+  .s-date .day{display:block;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+  .s-date .num{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .s-mid{min-width:0;}
+  .s-loc{font-weight:600;font-size:15px;}
+  .s-teams{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+  .s-right{text-align:right;white-space:nowrap;}
+  .s-cocoach{font-size:12.5px;color:var(--muted);}
+  .s-cocoach b{color:var(--ink);font-weight:600;}
+
+  .night-block{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .night-block:last-child{border-bottom:none;}
+  .night-date{
+    font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:16.5px;
+    display:flex;align-items:baseline;gap:8px;margin-bottom:8px;
+  }
+  .night-date .wk{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .gym-row{
+    display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:10px;
+    padding:7px 0;border-top:1px dashed var(--line);
+  }
+  .gym-row:first-of-type{border-top:none;}
+  .gym-loc{font-weight:600;font-size:14.5px;}
+  .gym-teams{font-size:12.5px;color:var(--ink-soft);}
+  .gym-coaches{font-size:13px;text-align:right;white-space:nowrap;}
+  .gym-coaches .tag{
+    font-family:"Karla",sans-serif;font-weight:700;font-size:11.5px;color:var(--chip-ink);
+    background:var(--chip-bg);border-radius:6px;padding:2px 7px;white-space:nowrap;margin-left:4px;
+  }
+  .gym-coaches .tag.anchor{color:var(--anchor-ink);background:var(--anchor-bg);}
+
+  details.rules{
+    margin-top:26px;padding:14px 16px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:10px;font-size:13px;color:var(--ink-soft);
+  }
+  details.rules summary{
+    cursor:pointer;font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:15px;color:var(--ink);letter-spacing:.02em;
+  }
+  details.rules ul{margin:10px 0 0;padding-left:20px;}
+  details.rules li{margin-bottom:6px;}
+
+  @media (max-width:420px){
+    .session{grid-template-columns:64px 1fr auto;gap:8px;}
+    .s-date .num{font-size:18px;}
+  }
+</style>
+
+<div class="wrap">
+  <div class="masthead">
+    <span class="eyebrow">Internal</span>
+    <h1>Coach Rotation</h1>
+    <span class="season-range">Fall 2026 &ndash; Winter 2027 &middot; 2 coaches per gym, every night</span>
+  </div>
+
+  <div class="mode-switcher" role="tablist" aria-label="Choose a view">
+    <button type="button" class="mode-btn" data-mode="coach" aria-pressed="true">By coach</button>
+    <button type="button" class="mode-btn" data-mode="night" aria-pressed="false">By night</button>
+  </div>
+
+  <!-- By coach -->
+  <div class="view-panel active" id="view-coach">
+    <div class="coach-grid" id="coachGrid" role="tablist" aria-label="Choose a coach"></div>
+    <div class="panel-head">
+      <h2 id="panelCoach">&nbsp;</h2>
+      <span class="stat"><b id="panelCount">0</b> sessions this season</span>
+    </div>
+    <div id="coachBody"></div>
+  </div>
+
+  <!-- By night -->
+  <div class="view-panel" id="view-night">
+    <div class="panel-head">
+      <h2>All nights</h2>
+      <span class="stat"><b id="nightCount">0</b> game nights</span>
+    </div>
+    <div id="nightBody"></div>
+  </div>
+
+  <details class="rules">
+    <summary>How assignments are made</summary>
+    <ul>
+      <li>Every gym-night has one early team and one late team sharing the gym; 2 coaches cover both.</li>
+      <li><b>Mina</b> always coaches U10-Barcelona&rsquo;s gym. <b>Yaseen</b> joins her except on Mondays,
+        and on 9 Tuesdays (spread through the season) where the 2nd coach comes from the day pool instead.</li>
+      <li><b>Alex</b> always coaches U12/14&rsquo;s gym; the 2nd coach there comes from the day pool.</li>
+      <li>All other gyms get 2 coaches from the day-availability pool, rotated to keep everyone&rsquo;s
+        total sessions as even as possible.</li>
+      <li>Never paired at the same gym: Madelyne &amp; Eric, Thomas &amp; Peter, Alex &amp; Mina.</li>
+      <li>Pool availability &mdash; Florent: Mon/Tue &middot; Craig: Fri &middot; Eric: Mon/Fri &middot;
+        Philemon: Mon/Fri &middot; Edomias: Mon (Sep&ndash;Oct), Mon/Tue (Nov+) &middot; Charly: Mon/Tue &middot;
+        Hamza: Mon/Fri &middot; Madelyne: Mon &middot; Aldemar: Mon/Tue &middot; Thomas: Tue/Fri &middot; Peter: Mon/Tue.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+const RECORDS = [{"date": "2026-09-21", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Florent", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2026-09-21", "day": "Monday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Eric", "coach2": "Philemon", "note": "pool + pool"}, {"date": "2026-09-22", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2026-09-22", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Aldemar", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2026-09-28", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Edomias", "coach2": "Hamza", "note": "pool + pool"}, {"date": "2026-09-28", "day": "Monday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Madelyne", "note": "Alex + pool"}, {"date": "2026-09-29", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-09-29", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Peter", "coach2": "Florent", "note": "pool + pool"}, {"date": "2026-10-02", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-10-02", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-02", "day": "Friday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Thomas", "coach2": "Eric", "note": "pool + pool"}, {"date": "2026-10-05", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Philemon", "note": "Alex + pool"}, {"date": "2026-10-06", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2026-10-06", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-06", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Aldemar", "coach2": "Peter", "note": "pool + pool"}, {"date": "2026-10-09", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-10-09", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-09", "day": "Friday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Hamza", "coach2": "Thomas", "note": "pool + pool"}, {"date": "2026-10-13", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Florent", "note": "Alex + pool"}, {"date": "2026-10-13", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Charly", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2026-10-13", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Aldemar", "coach2": "Peter", "note": "pool + pool"}, {"date": "2026-10-16", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-10-16", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-16", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Eric", "coach2": "Philemon", "note": "pool + pool"}, {"date": "2026-10-20", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Thomas", "note": "Alex + pool"}, {"date": "2026-10-20", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-20", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Florent", "coach2": "Charly", "note": "pool + pool"}, {"date": "2026-10-23", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Hamza", "note": "Alex + pool"}, {"date": "2026-10-23", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-23", "day": "Friday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Craig", "coach2": "Eric", "note": "pool + pool"}, {"date": "2026-10-26", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Edomias", "note": "Alex + pool"}, {"date": "2026-10-26", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Madelyne", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2026-10-27", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Aldemar", "note": "Alex + pool"}, {"date": "2026-10-27", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Peter", "coach2": "Florent", "note": "pool + pool"}, {"date": "2026-10-30", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Philemon", "note": "Alex + pool"}, {"date": "2026-10-30", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-10-30", "day": "Friday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Hamza", "coach2": "Thomas", "note": "pool + pool"}, {"date": "2026-11-02", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Edomias", "note": "Alex + pool"}, {"date": "2026-11-02", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Madelyne", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2026-11-03", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Edomias", "note": "Alex + pool"}, {"date": "2026-11-03", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Charly", "coach2": "Aldemar", "note": "pool + pool"}, {"date": "2026-11-03", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Peter", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2026-11-06", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-11-06", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Eric", "coach2": "Philemon", "note": "pool + pool"}, {"date": "2026-11-06", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-11-09", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Madelyne", "note": "Alex + pool"}, {"date": "2026-11-09", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Edomias", "coach2": "Hamza", "note": "pool + pool"}, {"date": "2026-11-10", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Thomas", "note": "Alex + pool"}, {"date": "2026-11-10", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-11-10", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Florent", "coach2": "Charly", "note": "pool + pool"}, {"date": "2026-11-16", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Madelyne", "note": "Alex + pool"}, {"date": "2026-11-16", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Eric", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2026-11-17", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Aldemar", "note": "Alex + pool"}, {"date": "2026-11-17", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Peter", "coach2": "Edomias", "note": "pool + pool"}, {"date": "2026-11-17", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-11-20", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-11-20", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Philemon", "coach2": "Hamza", "note": "pool + pool"}, {"date": "2026-11-20", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-11-23", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Madelyne", "note": "Alex + pool"}, {"date": "2026-11-23", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Florent", "coach2": "Eric", "note": "pool + pool"}, {"date": "2026-11-24", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Thomas", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2026-11-24", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Charly", "coach2": "Aldemar", "note": "pool + pool"}, {"date": "2026-11-30", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Philemon", "note": "Alex + pool"}, {"date": "2026-12-01", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Peter", "note": "Alex + pool"}, {"date": "2026-12-01", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-12-01", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Thomas", "coach2": "Edomias", "note": "pool + pool"}, {"date": "2026-12-04", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-12-04", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-12-04", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Hamza", "coach2": "Eric", "note": "pool + pool"}, {"date": "2026-12-07", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Madelyne", "note": "Alex + pool"}, {"date": "2026-12-07", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Florent", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2026-12-08", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2026-12-08", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Aldemar", "coach2": "Peter", "note": "pool + pool"}, {"date": "2026-12-08", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Thomas", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2026-12-11", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2026-12-11", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Philemon", "coach2": "Hamza", "note": "pool + pool"}, {"date": "2026-12-11", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-12-14", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Edomias", "coach2": "Madelyne", "note": "pool + pool"}, {"date": "2026-12-15", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2026-12-18", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Craig", "coach2": "Eric", "note": "pool + pool"}, {"date": "2027-01-04", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Florent", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2027-01-05", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Charly", "coach2": "Aldemar", "note": "pool + pool"}, {"date": "2027-01-08", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Philemon", "note": "Alex + pool"}, {"date": "2027-01-08", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-01-11", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Edomias", "coach2": "Hamza", "note": "pool + pool"}, {"date": "2027-01-12", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Peter", "note": "Alex + pool"}, {"date": "2027-01-12", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-01-15", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Thomas", "note": "Alex + pool"}, {"date": "2027-01-15", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Craig", "coach2": "Eric", "note": "pool + pool"}, {"date": "2027-01-15", "day": "Friday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-01-18", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Madelyne", "coach2": "Florent", "note": "pool + pool"}, {"date": "2027-01-19", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2027-01-19", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Aldemar", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2027-01-22", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Philemon", "note": "Alex + pool"}, {"date": "2027-01-22", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Hamza", "coach2": "Thomas", "note": "pool + pool"}, {"date": "2027-01-22", "day": "Friday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-01-25", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Edomias", "coach2": "Madelyne", "note": "pool + pool"}, {"date": "2027-01-26", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Peter", "note": "Alex + pool"}, {"date": "2027-01-26", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-02-01", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Florent", "coach2": "Eric", "note": "pool + pool"}, {"date": "2027-02-02", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2027-02-02", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-02-05", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2027-02-05", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Philemon", "coach2": "Hamza", "note": "pool + pool"}, {"date": "2027-02-05", "day": "Friday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-02-08", "day": "Monday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Edomias", "note": "Alex + pool"}, {"date": "2027-02-08", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Madelyne", "coach2": "Aldemar", "note": "pool + pool"}, {"date": "2027-02-09", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Peter", "note": "Alex + pool"}, {"date": "2027-02-09", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Thomas", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2027-02-16", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Florent", "note": "Alex + pool"}, {"date": "2027-02-16", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Charly", "coach2": "Aldemar", "note": "pool + pool"}, {"date": "2027-02-19", "day": "Friday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U6", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2027-02-19", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-02-19", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Eric", "coach2": "Philemon", "note": "pool + pool"}, {"date": "2027-02-22", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Edomias", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2027-02-22", "day": "Monday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Hamza", "coach2": "Madelyne", "note": "pool + pool"}, {"date": "2027-02-23", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Peter", "note": "Alex + pool"}, {"date": "2027-02-23", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-02-23", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Thomas", "coach2": "Florent", "note": "pool + pool"}, {"date": "2027-02-26", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2027-02-26", "day": "Friday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-03-01", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Eric", "coach2": "Philemon", "note": "pool + pool"}, {"date": "2027-03-02", "day": "Tuesday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2027-03-02", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Aldemar", "note": "Mina + pool (Tuesday reduction)"}, {"date": "2027-03-02", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Peter", "coach2": "Florent", "note": "pool + pool"}, {"date": "2027-03-05", "day": "Friday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Hamza", "note": "Alex + pool"}, {"date": "2027-03-05", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-03-08", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Edomias", "coach2": "Madelyne", "note": "pool + pool"}, {"date": "2027-03-09", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Thomas", "note": "Alex + pool"}, {"date": "2027-03-09", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-03-09", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Charly", "coach2": "Aldemar", "note": "pool + pool"}, {"date": "2027-03-12", "day": "Friday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Craig", "note": "Alex + pool"}, {"date": "2027-03-12", "day": "Friday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-03-12", "day": "Friday", "location": "Living Spirit", "address": "154 Legacy Vw SE, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Real Madrid", "coach1": "Eric", "coach2": "Philemon", "note": "pool + pool"}, {"date": "2027-03-15", "day": "Monday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Edomias", "note": "Alex + pool"}, {"date": "2027-03-15", "day": "Monday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Hamza", "note": "Mina + pool (Monday, no Yaseen)"}, {"date": "2027-03-16", "day": "Tuesday", "location": "Bridlewood", "address": "207 Bridleridge Way SW, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Peter", "note": "Alex + pool"}, {"date": "2027-03-16", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U8-Manchester United", "late": "U10-Real Madrid", "coach1": "Thomas", "coach2": "Florent", "note": "pool + pool"}, {"date": "2027-03-16", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U6", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Yaseen", "note": "Mina + Yaseen"}, {"date": "2027-03-22", "day": "Monday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Arsenal", "late": "U12/14", "coach1": "Alex", "coach2": "Madelyne", "note": "Alex + pool"}, {"date": "2027-03-23", "day": "Tuesday", "location": "St. Sebastian", "address": "65 Chaparral Drive SE, Calgary, AB", "early": "U8-Manchester United", "late": "U12/14", "coach1": "Alex", "coach2": "Charly", "note": "Alex + pool"}, {"date": "2027-03-30", "day": "Tuesday", "location": "Samuel W. Shaw", "address": "115 Shannon Dr SW, Calgary, AB", "early": "U6", "late": "U10-Real Madrid", "coach1": "Aldemar", "coach2": "Peter", "note": "pool + pool"}, {"date": "2027-03-30", "day": "Tuesday", "location": "Evergreen", "address": "367 Everstone Dr SW, Calgary, AB", "early": "U8-Arsenal", "late": "U10-Barcelona", "coach1": "Mina", "coach2": "Thomas", "note": "Mina + pool (Tuesday reduction)"}];
+
+const ANCHORS = new Set(['Mina', 'Alex', 'Yaseen']);
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function fmtDate(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  return {monthLabel: MONTHS[m-1] + ' ' + y, day: d};
+}
+
+/* ---------------- by-coach view ---------------- */
+const byCoach = {};
+RECORDS.forEach(r => {
+  [r.coach1, r.coach2].forEach(c => {
+    byCoach[c] = byCoach[c] || [];
+    byCoach[c].push(r);
+  });
+});
+const coachOrder = ['Mina','Alex','Yaseen', ...Object.keys(byCoach)
+  .filter(c => !ANCHORS.has(c))
+  .sort((a,b) => byCoach[b].length - byCoach[a].length)];
+
+const coachGrid = document.getElementById('coachGrid');
+const panelCoach = document.getElementById('panelCoach');
+const panelCount = document.getElementById('panelCount');
+const coachBody = document.getElementById('coachBody');
+
+coachOrder.forEach(coach => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'coach-btn' + (ANCHORS.has(coach) ? ' anchor' : '');
+  btn.dataset.coach = coach;
+  btn.setAttribute('role','tab');
+  btn.setAttribute('aria-pressed','false');
+  btn.innerHTML = coach + ' <span class="count">' + byCoach[coach].length + '</span>';
+  btn.addEventListener('click', () => selectCoach(coach));
+  coachGrid.appendChild(btn);
+});
+
+function otherTeam(r, team){ return team; }
+
+function selectCoach(coach){
+  [...coachGrid.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.coach === coach ? 'true' : 'false'));
+  panelCoach.textContent = coach;
+  const sessions = byCoach[coach];
+  panelCount.textContent = sessions.length;
+  coachBody.innerHTML = '';
+
+  let currentMonth = null, monthEl = null;
+  sessions.forEach(r => {
+    const {monthLabel, day} = fmtDate(r.date);
+    if(monthLabel !== currentMonth){
+      currentMonth = monthLabel;
+      const group = document.createElement('div');
+      group.className = 'month-group';
+      const label = document.createElement('div');
+      label.className = 'month-label';
+      label.textContent = monthLabel;
+      group.appendChild(label);
+      coachBody.appendChild(group);
+      monthEl = group;
+    }
+    const coCoach = r.coach1 === coach ? r.coach2 : r.coach1;
+    const row = document.createElement('div');
+    row.className = 'session';
+
+    const dateCol = document.createElement('div');
+    dateCol.className = 's-date';
+    dateCol.innerHTML = '<span class="day">' + r.day.slice(0,3) + '</span><span class="num">' + day + '</span>';
+
+    const midCol = document.createElement('div');
+    midCol.className = 's-mid';
+    midCol.innerHTML = '<div class="s-loc">' + r.location + '</div><div class="s-teams">' + r.early + ' &amp; ' + r.late + '</div>';
+
+    const rightCol = document.createElement('div');
+    rightCol.className = 's-right';
+    rightCol.innerHTML = '<div class="s-cocoach">with <b>' + coCoach + '</b></div>';
+
+    row.appendChild(dateCol);
+    row.appendChild(midCol);
+    row.appendChild(rightCol);
+    monthEl.appendChild(row);
+  });
+}
+
+selectCoach('Mina');
+
+/* ---------------- by-night view ---------------- */
+const nightBody = document.getElementById('nightBody');
+const byNight = {};
+RECORDS.forEach(r => {
+  byNight[r.date] = byNight[r.date] || { day: r.day, gyms: [] };
+  byNight[r.date].gyms.push(r);
+});
+const nightDates = Object.keys(byNight).sort();
+document.getElementById('nightCount').textContent = nightDates.length;
+
+function tagHTML(coach){
+  return '<span class="tag' + (ANCHORS.has(coach) ? ' anchor' : '') + '">' + coach + '</span>';
+}
+
+let currentMonth2 = null, monthEl2 = null;
+nightDates.forEach(date => {
+  const {monthLabel, day} = fmtDate(date);
+  if(monthLabel !== currentMonth2){
+    currentMonth2 = monthLabel;
+    const group = document.createElement('div');
+    group.className = 'month-group';
+    const label = document.createElement('div');
+    label.className = 'month-label';
+    label.textContent = monthLabel;
+    group.appendChild(label);
+    nightBody.appendChild(group);
+    monthEl2 = group;
+  }
+  const night = byNight[date];
+  const block = document.createElement('div');
+  block.className = 'night-block';
+  const dateHeader = document.createElement('div');
+  dateHeader.className = 'night-date';
+  dateHeader.innerHTML = '<span class="wk">' + night.day + '</span><span>' + day + ' ' + monthLabel.split(' ')[0] + '</span>';
+  block.appendChild(dateHeader);
+
+  night.gyms.forEach(g => {
+    const row = document.createElement('div');
+    row.className = 'gym-row';
+    const left = document.createElement('div');
+    left.innerHTML = '<div class="gym-loc">' + g.location + '</div><div class="gym-teams">' + g.early + ' &amp; ' + g.late + '</div>';
+    const right = document.createElement('div');
+    right.className = 'gym-coaches';
+    right.innerHTML = tagHTML(g.coach1) + tagHTML(g.coach2);
+    row.appendChild(left);
+    row.appendChild(right);
+    block.appendChild(row);
+  });
+  monthEl2.appendChild(block);
+});
+
+/* ---------------- mode switching ---------------- */
+const modeButtons = [...document.querySelectorAll('.mode-btn')];
+const panels = {
+  coach: document.getElementById('view-coach'),
+  night: document.getElementById('view-night'),
+};
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    modeButtons.forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+    Object.entries(panels).forEach(([key, el]) => el.classList.toggle('active', key === btn.dataset.mode));
+  });
+});
+</script>
